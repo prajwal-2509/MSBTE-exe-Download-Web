@@ -1,41 +1,47 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import FeaturesSection from './components/FeaturesSection';
+import ParticleCanvas from './components/ParticleCanvas';
+import Navbar         from './components/Navbar';
+import HeroSection    from './components/HeroSection';
+import FeaturesSection  from './components/FeaturesSection';
 import ResourcesSection from './components/ResourcesSection';
-import DownloadSection from './components/DownloadSection';
-import Footer from './components/Footer';
+import DownloadSection  from './components/DownloadSection';
+import Footer           from './components/Footer';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Noise texture overlay */}
-      <div className="noise-overlay" aria-hidden="true" />
+    <>
+      {/* Fixed particle canvas — sits behind everything at z-[-1] */}
+      <ParticleCanvas />
 
-      {/* Navigation */}
-      <Navbar />
+      {/* Page shell */}
+      <div className="relative min-h-screen bg-white/92">
+        <Navbar />
 
-      {/* Main content */}
-      <main id="main-content">
-        <HeroSection />
+        <main id="main-content">
+          <HeroSection />
 
-        {/* Divider */}
-        <div className="gradient-line mx-auto max-w-5xl" aria-hidden="true" />
+          {/* Thin divider */}
+          <div className="max-w-5xl mx-auto px-6" aria-hidden="true">
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          </div>
 
-        <FeaturesSection />
+          <FeaturesSection />
 
-        {/* Divider */}
-        <div className="gradient-line mx-auto max-w-5xl" aria-hidden="true" />
+          <div className="max-w-5xl mx-auto px-6" aria-hidden="true">
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          </div>
 
-        <ResourcesSection />
+          <ResourcesSection />
 
-        {/* Divider */}
-        <div className="gradient-line mx-auto max-w-5xl" aria-hidden="true" />
+          <div className="max-w-5xl mx-auto px-6" aria-hidden="true">
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          </div>
 
-        <DownloadSection />
-      </main>
+          <DownloadSection />
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }
