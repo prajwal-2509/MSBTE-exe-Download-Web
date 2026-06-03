@@ -1,9 +1,6 @@
 @import "tailwindcss";
 
-:root {
-  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
-}
-
+/* ─── Base reset ─────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -14,63 +11,58 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Body MUST be position:relative so the fixed canvas stacks behind it */
 body {
-  font-family: var(--font-sans);
-  background: #ffffff;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: #ffffff;
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Scrollbar */
+/* ─── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #f8fafc; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* Typewriter cursor blink */
+/* ─── Typewriter cursor ──────────────────────────────────── */
 .tw-cursor {
   display: inline-block;
   width: 3px;
-  height: 0.9em;
+  height: 0.85em;
   background: #0f172a;
-  margin-left: 4px;
+  margin-left: 3px;
   vertical-align: middle;
   border-radius: 2px;
-  animation: blink 0.8s step-end infinite;
+  animation: blink 0.85s step-end infinite;
 }
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
 
-/* Nav underline hover */
+/* ─── Nav underline ──────────────────────────────────────── */
 .nav-link {
   position: relative;
+  display: inline-block;
 }
 .nav-link::after {
   content: '';
   position: absolute;
-  left: 0; bottom: -2px;
-  width: 0; height: 1.5px;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 1.5px;
   background: #0f172a;
   border-radius: 9999px;
   transition: width 0.22s ease;
 }
 .nav-link:hover::after { width: 100%; }
 
-/* Card hover */
-.resource-card {
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-}
-.resource-card:hover {
-  box-shadow: 0 12px 40px -8px rgba(99,102,241,0.13), 0 4px 16px -4px rgba(0,0,0,0.06);
-  transform: translateY(-3px);
-}
-
-/* Badge pill */
-.badge {
+/* ─── Section badge ──────────────────────────────────────── */
+.section-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -79,8 +71,18 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #6366f1;
-  background: rgba(99,102,241,0.08);
-  border: 1px solid rgba(99,102,241,0.2);
-  padding: 3px 10px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 3px 11px;
   border-radius: 9999px;
+}
+
+/* ─── Resource card hover ────────────────────────────────── */
+.res-card {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.res-card:hover {
+  box-shadow: 0 16px 48px -10px rgba(99, 102, 241, 0.14),
+              0 4px 16px -4px rgba(0, 0, 0, 0.07);
+  transform: translateY(-4px);
 }
