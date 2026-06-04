@@ -205,18 +205,20 @@ export default function App() {
               CRITICAL WORD-SPACING FIX: every word span has
               `inline-block mr-3 md:mr-5` — words physically cannot squish.
              ────────────────────────────────────────────────────────────── */}
+          {/* FIX 1 — OVERLAPPING HEADLINE FIX
+               flex-wrap + gap-x/gap-y on the parent handles ALL word spacing.
+               No mr- on spans needed — flex gap is the correct CSS solution. */}
           <motion.h1
             variants={sentenceV}
             initial="hidden"
             animate="show"
-            className="text-6xl md:text-[5.5rem] font-extrabold tracking-tighter leading-[1.1] text-slate-900 mb-6"
+            className="flex flex-wrap justify-center gap-x-3 md:gap-x-5 gap-y-2 md:gap-y-4 text-5xl md:text-[5.5rem] font-extrabold tracking-tight text-slate-900 mb-8 max-w-5xl"
             aria-label="Experience liftoff with the next-gen result scraper."
           >
             {WORDS.map((word, i) => (
               <motion.span
                 key={i}
                 variants={wordV}
-                className="inline-block mr-3 md:mr-5"  /* ← THE FIX — never omit this */
               >
                 {word}
               </motion.span>
@@ -235,49 +237,53 @@ export default function App() {
             running completely local.
           </motion.p>
 
-          {/* Buttons — EXACT SPEC container class */}
+          {/* FIX 2 — BUTTON CONTAINER: flex-wrap + justify-center + w-full px-4
+               whitespace-nowrap on each button prevents text from wrapping inside the pill. */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: WORD_DELAY + 0.15, ease: 'easeOut' }}
-            className="flex flex-col sm:flex-row gap-4 items-center z-20 pointer-events-auto"
+            className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 items-center z-20 pointer-events-auto w-full px-4"
           >
-            {/* Primary — EXACT SPEC */}
+            {/* Primary */}
             <button
               id="hero-download-btn"
               onClick={() => document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-slate-900 text-white px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-2 cursor-pointer hover:bg-slate-700">
+              className="whitespace-nowrap bg-slate-900 text-white px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-2 cursor-pointer hover:bg-slate-700">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
               Download for Windows (.exe)
             </button>
 
-            {/* Secondary — EXACT SPEC */}
+            {/* Secondary */}
             <button
               id="hero-docs-btn"
               onClick={() => document.getElementById('resources')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-white border-2 border-slate-200 text-slate-700 px-8 py-4 rounded-full font-semibold hover:border-slate-300 transition-all cursor-pointer hover:bg-slate-50 hover:-translate-y-1 hover:shadow-lg">
+              className="whitespace-nowrap bg-white border-2 border-slate-200 text-slate-700 px-8 py-4 rounded-full font-semibold hover:border-slate-300 transition-all cursor-pointer hover:bg-slate-50 hover:-translate-y-1 hover:shadow-lg">
               Read Documentation
             </button>
           </motion.div>
         </div>
 
-        {/* Scroll indicator — EXACT SPEC: absolute bottom-8 left-1/2 -translate-x-1/2 */}
+        {/* FIX 3 — SCROLL INDICATOR wrapped in <a href="#demo">
+               Clicking it smoothly scrolls to the demo section.              */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: WORD_DELAY + 0.7, duration: 0.6 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400"
-          aria-hidden="true"
         >
-          <span className="text-[10px] uppercase tracking-[0.2em] font-bold">Scroll to explore</span>
-          {/* EXACT SPEC gradient line */}
-          <motion.div
-            animate={{ scaleY: [1, 0.5, 1], opacity: [1, 0.4, 1] }}
-            transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-            className="w-px h-8 bg-gradient-to-b from-slate-400 to-transparent"
-          />
+          <a
+            href="#demo"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400 hover:text-blue-500 transition-colors cursor-pointer z-20"
+          >
+            <span className="text-[10px] uppercase tracking-[0.2em] font-bold">Scroll to explore</span>
+            <motion.div
+              animate={{ scaleY: [1, 0.5, 1], opacity: [1, 0.4, 1] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              className="w-px h-8 bg-gradient-to-b from-current to-transparent"
+            />
+          </a>
         </motion.div>
       </section>
 
@@ -286,7 +292,8 @@ export default function App() {
           4. DEMO VIDEO SECTION
           EXACT SPEC: relative z-10 w-full py-24 bg-white
          ════════════════════════════════════════════════════════════════════ */}
-      <section className="relative z-10 w-full py-24 bg-white" aria-label="Demo">
+      {/* id="demo" added so the scroll indicator anchor above can target it */}
+      <section id="demo" className="relative z-10 w-full py-24 bg-white" aria-label="Demo">
 
         {/* EXACT SPEC inner wrapper */}
         <div className="w-full max-w-5xl mx-auto px-6 flex flex-col items-center">
@@ -331,10 +338,16 @@ export default function App() {
               <div className="w-0 h-0 border-y-8 border-y-transparent border-l-[14px] border-l-white ml-1" aria-hidden="true"/>
             </div>
 
-            {/* EXACT SPEC text */}
-            <p className="text-white/70 mt-6 font-medium tracking-wide relative group-hover:text-white transition-colors">
+            {/* FIX 3b — fade-in animation on Watch Demo text */}
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-white/70 mt-6 font-medium tracking-wide relative group-hover:text-white transition-colors"
+            >
               Watch Demo <span className="text-white/40">(1:20)</span>
-            </p>
+            </motion.p>
           </motion.div>
         </div>
       </section>
@@ -612,8 +625,8 @@ export default function App() {
          ════════════════════════════════════════════════════════════════════ */}
       <footer className="relative z-10 w-full bg-slate-50 border-t border-slate-200 py-10 mt-20" role="contentinfo">
 
-        {/* EXACT SPEC inner wrapper */}
-        <div className="w-full max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 font-medium gap-4">
+        {/* FIX 4 — FOOTER ALIGNMENT: max-w-7xl, lg:flex-row, gap-8, text-center lg:text-left */}
+        <div className="w-full max-w-7xl mx-auto px-6 flex flex-col lg:flex-row justify-between items-center text-sm text-slate-500 font-medium gap-8 text-center lg:text-left">
 
           {/* Brand */}
           <div className="flex items-center gap-2.5">
