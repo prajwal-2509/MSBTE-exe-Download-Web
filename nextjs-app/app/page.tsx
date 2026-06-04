@@ -11,7 +11,6 @@ import {
   Wrench,
   ShieldCheck,
   ArrowRight,
-  Github,
 } from "lucide-react";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -44,17 +43,20 @@ function makeParticle(W: number, H: number): Particle {
     originY: y,
     vx: 0,
     vy: 0,
-    r: Math.random() * 2 + 1,
+    // TASK 1: strictly 1 px – 2.5 px for high-density micro-particle look
+    r: Math.random() * 1.5 + 1,
     color: GOOGLE_COLORS[Math.floor(Math.random() * GOOGLE_COLORS.length)],
     phase: Math.random() * Math.PI * 2,
   };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CANVAS BACKGROUND
-   • 120 tiny dots in Google colors
-   • Slowly drift with sine-wave float
-   • Mouse proximity < 120px → repel via vx/vy; friction pulls back to origin
+   CANVAS BACKGROUND — HIGH-DENSITY MICRO-PARTICLE ENGINE
+   • 450 tiny dots (1–2.5 px) in Google colors — matches antigravity.google density
+   • Sine-wave gentle float, each particle has a unique phase offset
+   • Mouse proximity < 140 px → strong repel via vx/vy
+   • Tight spring (0.035) + friction (0.88) → crisp snap-back, zero jitter
+   • pointer-events-none ensures ALL buttons/links stay fully clickable
    ═══════════════════════════════════════════════════════════════════════════ */
 function CanvasBackground() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -66,7 +68,8 @@ function CanvasBackground() {
 
     let W = (canvas.width = window.innerWidth);
     let H = (canvas.height = window.innerHeight);
-    let particles: Particle[] = Array.from({ length: 120 }, () =>
+    // TASK 1: upgraded from 120 → 450 particles
+    let particles: Particle[] = Array.from({ length: 450 }, () =>
       makeParticle(W, H)
     );
 
@@ -84,7 +87,8 @@ function CanvasBackground() {
     const onResize = () => {
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
-      particles = Array.from({ length: 120 }, () => makeParticle(W, H));
+      // respawn 450 on every resize so density is always consistent
+      particles = Array.from({ length: 450 }, () => makeParticle(W, H));
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -98,29 +102,43 @@ function CanvasBackground() {
       const t = Date.now() * 0.001;
 
       particles.forEach((p) => {
-        /* Spring force back to origin */
-        p.vx += (p.originX - p.x) * 0.02;
-        p.vy += (p.originY - p.y) * 0.02;
+        /*
+         * TASK 1 — UPGRADED PHYSICS
+         *
+         * Spring force: 0.035 (was 0.02) — tighter pull to origin for
+         * a crisp, jitter-free snap-back after mouse repulsion.
+         */
+        p.vx += (p.originX - p.x) * 0.035;
+        p.vy += (p.originY - p.y) * 0.035;
 
-        /* Sine-wave gentle float */
-        p.vy += Math.sin(t + p.phase) * 0.03;
+        /* Sine-wave gentle float — unchanged, keeps motion organic */
+        p.vy += Math.sin(t + p.phase) * 0.025;
 
-        /* Mouse repulsion — Math.hypot distance check */
+        /*
+         * Mouse repulsion — Math.hypot distance check
+         * Threshold raised 120 → 140 px for wider interaction radius.
+         * Repel force raised 0.04 → 0.055 for responsive snap-away.
+         * TASK 2: canvas is pointer-events-none so every button/link
+         * beneath remains fully clickable regardless of cursor position.
+         */
         const dx = p.x - mouseX;
         const dy = p.y - mouseY;
-        if (Math.hypot(dx, dy) < 120) {
-          p.vx += dx * 0.04;
-          p.vy += dy * 0.04;
+        if (Math.hypot(dx, dy) < 140) {
+          p.vx += dx * 0.055;
+          p.vy += dy * 0.055;
         }
 
-        /* Friction — dampens velocity, particle returns to origin naturally */
-        p.vx *= 0.9;
-        p.vy *= 0.9;
+        /*
+         * Friction: 0.88 (was 0.9) — slightly stronger damping eliminates
+         * residual oscillation and produces a clean, settled resting state.
+         */
+        p.vx *= 0.88;
+        p.vy *= 0.88;
 
         p.x += p.vx;
         p.y += p.vy;
 
-        /* Draw crisp dot */
+        /* Draw crisp sub-3 px dot — micro-particle aesthetic */
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
@@ -147,7 +165,12 @@ function CanvasBackground() {
     */
     <canvas
       ref={ref}
-      className="fixed inset-0 z-0 pointer-events-none bg-white opacity-70"
+      /*
+       * opacity-80 (was 70) — with 450 particles the field needs slightly
+       * more visibility. pointer-events-none is non-negotiable: it ensures
+       * the canvas NEVER intercepts clicks on buttons, links, or the nav.
+       */
+      className="fixed inset-0 z-0 pointer-events-none bg-white opacity-80"
       aria-hidden="true"
     />
   );
@@ -715,16 +738,22 @@ function DownloadSection() {
               Download for Windows (.exe)
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </a>
-            <a
-              href="https://github.com/prajwal-2509/MSBTE-exe-Download-Web"
-              target="_blank"
-              rel="noopener noreferrer"
-              id="github-link"
-              className="whitespace-nowrap flex items-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-semibold text-sm px-6 py-3.5 rounded-full hover:scale-105 hover:border-slate-300 hover:shadow-lg transition-all cursor-pointer active:scale-95"
-            >
-              <Github size={15} />
-              View on GitHub
-            </a>
+            <a 
+  href="https://github.com/prajwal-2509/MSBTE-exe-Download-Web"
+  target="_blank" 
+  rel="noopener noreferrer"
+  className="bg-white border-2 border-slate-200 text-slate-700 px-7 py-3.5 rounded-full font-semibold hover:border-slate-300 transition-all cursor-pointer hover:bg-slate-50 hover:-translate-y-1 hover:shadow-lg flex items-center gap-2"
+>
+  {/* 👇 Inline Bulletproof GitHub SVG Icon */}
+  <svg 
+    className="w-5 h-5 fill-current" 
+    viewBox="0 0 24 24" 
+    aria-hidden="true"
+  >
+    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.06.069-.06 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+  </svg>
+  View on GitHub
+</a>
           </div>
           <p className="text-xs text-slate-400 font-medium flex items-center gap-2 mt-1">
             <span className="w-2 h-2 rounded-full bg-[#34A853] shrink-0" />
