@@ -18,7 +18,7 @@
 > [!IMPORTANT]
 > This repository contains **only the marketing, landing page, and documentation website** for the tool. For the actual desktop application source code and releases, see the **[msbte-result-scraper-v3](https://github.com/prajwal-2509/msbte-result-scraper-v3)** repository.
 
-* **Live Deployed Site:** [https://msbte-exe-download-web.vercel.app](https://msbte-exe-download-web.vercel.app)
+* **Live Deployed Site:** [https://msbte-exe-download-web.vercel.app](https://msbte-exe-download-web.vercel.app/)
 * **Desktop App Repository:** [prajwal-2509/msbte-result-scraper-v3](https://github.com/prajwal-2509/msbte-result-scraper-v3)
 
 ---
