@@ -1,17 +1,77 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Download,
   BookOpen,
-  Play,
   CheckCircle2,
   FileText,
   Wrench,
   ShieldCheck,
   ArrowRight,
+  Box,
+  HardDrive,
 } from "lucide-react";
+
+const MotionLink = motion(Link);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UX POLISH STYLE CONSTANTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+const meshBgStyle = {
+  backgroundColor: "#f8fafc",
+  backgroundImage: `
+    radial-gradient(at 0% 0%, rgba(66, 133, 244, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(52, 168, 83, 0.02) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(251, 188, 5, 0.02) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(234, 67, 53, 0.02) 0px, transparent 50%)
+  `,
+};
+
+const whiteMeshBgStyle = {
+  backgroundColor: "#ffffff",
+  backgroundImage: `
+    radial-gradient(at 0% 0%, rgba(66, 133, 244, 0.015) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(52, 168, 83, 0.01) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(251, 188, 5, 0.01) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(234, 67, 53, 0.01) 0px, transparent 50%)
+  `,
+};
+
+const featuresBgStyle = {
+  backgroundColor: "#ffffff",
+  backgroundImage: `
+    radial-gradient(rgba(31, 60, 136, 0.09) 1.2px, transparent 1.2px),
+    linear-gradient(to bottom, #F4F6FB 0%, #ffffff 50%, #ffffff 100%)
+  `,
+  backgroundSize: "24px 24px, 100% 100%",
+};
+
+const dotGridBgStyle = {
+  backgroundColor: "#f8fafc",
+  backgroundImage: "radial-gradient(rgba(31, 60, 136, 0.07) 1.2px, transparent 1.2px)",
+  backgroundSize: "24px 24px",
+};
+
+const listContainerV = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const listItemV = {
+  hidden: { opacity: 0, y: 8 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" as const },
+  },
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TYPES
@@ -180,7 +240,7 @@ function CanvasBackground() {
    INNER CONTAINER — DRY helper used inside every section
    CRITICAL: prevents content from ever touching the viewport edges
    ═══════════════════════════════════════════════════════════════════════════ */
-function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`w-full max-w-6xl mx-auto px-6 md:px-12 ${className}`}>
       {children}
@@ -228,14 +288,19 @@ function Header() {
         </nav>
 
         {/* Download CTA — right */}
-        <a
-          href="#download"
-          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-slate-900/20 cursor-pointer"
+        <motion.a
+          href="https://github.com/prajwal-2509/msbte-result-scraper-v3/releases/download/v.1.0.0/MSBTE_Scraper_v1.0.0.zip"
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.03, boxShadow: "0 10px 20px -5px rgba(15, 23, 42, 0.2)" }}
+          whileTap={{ scale: 0.97 }}
+          className="flex items-center gap-1.5 bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 rounded-full cursor-pointer transition-colors hover:bg-slate-800"
           aria-label="Download"
         >
           <Download size={13} strokeWidth={2.5} aria-hidden="true" />
           Download
-        </a>
+        </motion.a>
       </Container>
     </header>
   );
@@ -279,10 +344,22 @@ function Hero() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.05 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-[0.14em] uppercase border border-blue-100 mb-10"
+          className="relative overflow-hidden inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/60 text-blue-600 text-xs font-bold tracking-[0.14em] uppercase border border-blue-100/80 mb-10 shadow-sm"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#4285F4] animate-pulse" aria-hidden="true" />
-          Now Available for Windows
+          {/* Shimmer overlay */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+            animate={{
+              x: ["-100%", "200%"],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2.5,
+              ease: "linear",
+            }}
+          />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#4285F4] animate-pulse relative z-10" aria-hidden="true" />
+          <span className="relative z-10">Now Available for Windows</span>
         </motion.div>
 
         {/*
@@ -321,27 +398,34 @@ function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: WORD_DELAY + 0.15, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 z-20"
         >
           {/* Primary */}
-          <a
-            href="#download"
+          <motion.a
+            href="https://github.com/prajwal-2509/msbte-result-scraper-v3/releases/download/v.1.0.0/MSBTE_Scraper_v1.0.0.zip"
+            download
+            target="_blank"
+            rel="noopener noreferrer"
             id="hero-download"
-            className="whitespace-nowrap flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-semibold text-sm px-8 py-4 rounded-full hover:scale-105 hover:shadow-xl hover:shadow-slate-900/25 transition-all cursor-pointer active:scale-95"
+            whileHover={{ scale: 1.03, boxShadow: "0 20px 30px -10px rgba(15, 23, 42, 0.3)" }}
+            whileTap={{ scale: 0.97 }}
+            className="whitespace-nowrap flex items-center gap-2 bg-slate-900 text-white font-semibold text-sm px-8 py-4 rounded-full cursor-pointer transition-colors hover:bg-slate-800"
           >
             <Download size={16} strokeWidth={2.5} aria-hidden="true" />
             Download for Windows (.exe)
-          </a>
+          </motion.a>
 
           {/* Secondary */}
-          <a
+          <motion.a
             href="#resources"
             id="hero-docs"
-            className="whitespace-nowrap flex items-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-semibold text-sm px-8 py-4 rounded-full hover:scale-105 hover:border-slate-300 hover:shadow-lg transition-all cursor-pointer active:scale-95"
+            whileHover={{ scale: 1.03, boxShadow: "0 20px 30px -10px rgba(226, 232, 240, 0.5)" }}
+            whileTap={{ scale: 0.97 }}
+            className="whitespace-nowrap flex items-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-semibold text-sm px-8 py-4 rounded-full cursor-pointer transition-colors hover:border-slate-300"
           >
             <BookOpen size={15} aria-hidden="true" />
             Read Documentation
-          </a>
+          </motion.a>
         </motion.div>
 
         {/* Scroll indicator */}
@@ -372,11 +456,19 @@ function Hero() {
    DEMO VIDEO SECTION
    ═══════════════════════════════════════════════════════════════════════════ */
 function DemoSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], [-45, 45]);
+
   return (
-    /* EXACT SPEC: py-24 w-full bg-slate-50 border-t border-slate-100 */
     <section
+      ref={containerRef}
       id="demo"
-      className="py-24 w-full bg-slate-50 border-t border-slate-100"
+      style={meshBgStyle}
+      className="py-32 w-full border-t border-slate-100 overflow-hidden"
       aria-label="Demo"
     >
       <Container className="flex flex-col items-center">
@@ -391,53 +483,41 @@ function DemoSection() {
           See it in action
         </motion.p>
 
-        {/*
-          EXACT SPEC motion.div — fades and slides up on scroll (whileInView).
-          aspect-video w-full max-w-4xl mx-auto bg-slate-900 rounded-[2rem] shadow-2xl
-          flex flex-col items-center justify-center cursor-pointer group
-        */}
-        <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.96 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.75, ease: "easeOut" }}
-          className="aspect-video w-full max-w-4xl mx-auto bg-slate-900 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden border border-slate-800 hover:shadow-blue-500/20 transition-shadow"
-          role="button"
-          aria-label="Watch demo video"
-          tabIndex={0}
-        >
-          {/* Dark bg gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950" />
-          <div className="absolute inset-0 opacity-25 bg-[radial-gradient(ellipse_60%_60%_at_25%_30%,rgba(66,133,244,0.5),transparent),radial-gradient(ellipse_50%_50%_at_75%_70%,rgba(52,168,83,0.3),transparent)]" />
+        {/* Outer parallax container */}
+        <motion.div style={{ y }} className="w-full max-w-4xl mx-auto z-10">
+          {/* Inner animation container */}
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.75, ease: "easeOut" }}
+            className="aspect-video w-full bg-slate-900 rounded-[2rem] shadow-2xl flex flex-col justify-end group relative overflow-hidden border border-slate-800 hover:shadow-blue-500/20 transition-shadow"
+            aria-label="Watch demo video"
+          >
+            {/* Dark bg gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950" />
+            <div className="absolute inset-0 opacity-25 bg-[radial-gradient(ellipse_60%_60%_at_25%_30%,rgba(66,133,244,0.5),transparent),radial-gradient(ellipse_50%_50%_at_75%_70%,rgba(52,168,83,0.3),transparent)]" />
 
-          {/* Terminal dots */}
-          <div className="absolute top-0 inset-x-0 h-9 bg-slate-800/60 border-b border-slate-700/40 flex items-center px-5 gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-500/80" />
-            <span className="w-3 h-3 rounded-full bg-yellow-400/80" />
-            <span className="w-3 h-3 rounded-full bg-green-500/80" />
-            <span className="ml-3 text-xs text-slate-500 font-mono">MSBTE Master Scraper v1.0</span>
-          </div>
-
-          {/* Play icon — white, scales on group-hover */}
-          <div className="relative flex flex-col items-center gap-5 group-hover:scale-110 transition-transform duration-300">
-            <div className="relative">
-              <div className="absolute inset-0 w-20 h-20 rounded-full bg-white/15 blur-xl group-hover:scale-125 transition-transform duration-300" />
-              <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center shadow-2xl group-hover:bg-white/18 transition-colors duration-300">
-                <Play size={30} className="text-white ml-1.5" fill="white" strokeWidth={1} />
-              </div>
+            {/* Terminal dots */}
+            <div className="absolute top-0 inset-x-0 h-9 bg-slate-800/60 border-b border-slate-700/40 flex items-center px-5 gap-1.5 z-10">
+              <span className="w-3 h-3 rounded-full bg-red-500/80" />
+              <span className="w-3 h-3 rounded-full bg-yellow-400/80" />
+              <span className="w-3 h-3 rounded-full bg-green-500/80" />
+              <span className="ml-3 text-xs text-slate-500 font-mono">MSBTE Master Scraper v1.0</span>
             </div>
 
-            {/* Watch Demo text — fades in */}
-            <motion.p
-              initial={{ opacity: 0, y: 6 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.45 }}
-              className="text-white/70 font-medium tracking-wide text-sm relative group-hover:text-white transition-colors duration-200"
-            >
-              Watch Demo <span className="text-white/40">(1:20)</span>
-            </motion.p>
-          </div>
+            {/* Video element - absolute to fill container below title bar */}
+            <div className="absolute inset-0 pt-9">
+              <video
+                controls
+                className="w-full h-full rounded-b-[2rem] object-cover"
+                aria-label="Demo Video Player"
+              >
+                <source src="/demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </motion.div>
         </motion.div>
       </Container>
     </section>
@@ -452,36 +532,223 @@ const riseV = {
   show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
-function ChartPlaceholder({ id }: { id: string }) {
+function WorkerGridMockup() {
+  const [tick, setTick] = React.useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((t) => (t + 1) % 4);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const workerStates = [
+    // Worker 0
+    [
+      { status: "idle" as const, text: "Idle" },
+      { status: "working" as const, text: "Navigating..." },
+      { status: "working" as const, text: "Submitting..." },
+      { status: "done" as const, text: "Done" }
+    ],
+    // Worker 1
+    [
+      { status: "working" as const, text: "Solving captcha..." },
+      { status: "done" as const, text: "Done" },
+      { status: "idle" as const, text: "Idle" },
+      { status: "working" as const, text: "Navigating..." }
+    ],
+    // Worker 2
+    [
+      { status: "idle" as const, text: "Idle" },
+      { status: "working" as const, text: "Navigating..." },
+      { status: "working" as const, text: "Solving captcha..." },
+      { status: "done" as const, text: "Done" }
+    ],
+    // Worker 3
+    [
+      { status: "working" as const, text: "Navigating..." },
+      { status: "working" as const, text: "Submitting..." },
+      { status: "done" as const, text: "Done" },
+      { status: "idle" as const, text: "Idle" }
+    ],
+    // Worker 4
+    [
+      { status: "done" as const, text: "Done" },
+      { status: "idle" as const, text: "Idle" },
+      { status: "working" as const, text: "Solving captcha..." },
+      { status: "working" as const, text: "Submitting..." }
+    ],
+    // Worker 5
+    [
+      { status: "idle" as const, text: "Idle" },
+      { status: "working" as const, text: "Solving captcha..." },
+      { status: "done" as const, text: "Done" },
+      { status: "idle" as const, text: "Idle" }
+    ]
+  ];
+
+  const getStatusColor = (status: "idle" | "working" | "done") => {
+    switch (status) {
+      case "working":
+        return "#3B6FD4";
+      case "done":
+        return "#2E9E6B";
+      case "idle":
+      default:
+        return "#CBD5E1";
+    }
+  };
+
+  const getBorderColor = (status: "idle" | "working" | "done") => {
+    switch (status) {
+      case "working":
+        return "border-l-[#3B6FD4]";
+      case "done":
+        return "border-l-[#2E9E6B]";
+      case "idle":
+      default:
+        return "border-l-[#CBD5E1]";
+    }
+  };
+
   return (
-    <div className="w-full aspect-[4/3] bg-white rounded-3xl border border-slate-200 shadow-lg relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6">
-      <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <pattern id={`g-${id}`} width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#e2e8f0" strokeWidth="0.8" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill={`url(#g-${id})`} />
-      </svg>
-      <div className="relative flex items-end gap-2">
-        {[36, 54, 44, 62, 50, 68, 56].map((h, i) => (
-          <div
-            key={i}
-            className="w-7 rounded-t"
-            style={{
-              height: h,
-              background: `linear-gradient(to top, ${["#4285F4", "#34A853", "#EA4335", "#FBBC05", "#4285F4", "#34A853", "#EA4335"][i]}99,${["#4285F4", "#34A853", "#EA4335", "#FBBC05", "#4285F4", "#34A853", "#EA4335"][i]}44)`,
-            }}
-          />
-        ))}
+    <div className="w-full h-[340px] bg-slate-50 rounded-3xl border border-[#1F3C88]/8 shadow-[0_24px_48px_-12px_rgba(31,60,136,0.12)] p-5 flex flex-col justify-center gap-4 relative overflow-hidden">
+      {/* Decorative Title Bar */}
+      <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 z-10">
+        <span className="text-xs font-bold text-slate-500 tracking-wider uppercase font-mono">
+          Live Scraper Grid
+        </span>
+        <span className="flex items-center gap-1.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse">
+          Active Thread Pool
+        </span>
       </div>
-      <div className="relative flex items-center gap-4">
-        {([["Pass", "#34A853"], ["Fail", "#EA4335"], ["ATKT", "#FBBC05"]] as const).map(([t, c]) => (
-          <span key={t} className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <span className="w-2 h-2 rounded-full" style={{ background: c }} />
-            {t}
+
+      {/* Grid */}
+      <div className="grid grid-cols-3 gap-3.5 z-10">
+        {workerStates.map((states, idx) => {
+          const w = states[tick];
+          return (
+            <motion.div
+              key={idx}
+              layout
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className={`bg-white border-l-[3px] ${getBorderColor(w.status)} border-y border-r border-slate-200 rounded-lg p-3 shadow-sm flex flex-col justify-between h-[80px] relative`}
+            >
+              {/* Top row */}
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                  Worker {idx}
+                </span>
+                <motion.span
+                  animate={{
+                    backgroundColor: getStatusColor(w.status),
+                    scale: w.status === "working" ? [1, 1.3, 1] : 1,
+                  }}
+                  transition={{
+                    scale: { repeat: w.status === "working" ? Infinity : 0, duration: 1.5, ease: "easeInOut" },
+                    backgroundColor: { duration: 0.3 }
+                  }}
+                  className="w-2.5 h-2.5 rounded-full"
+                />
+              </div>
+              
+              {/* Status text */}
+              <motion.p 
+                key={w.text}
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-[11px] font-semibold text-slate-700 leading-tight"
+              >
+                {w.text}
+              </motion.p>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ExcelGridMockup() {
+  const rows = [
+    { seat: "204321", name: "ADITYA SHINDE", m1: "100/84", m2: "100/91", pct: "87.5%", res: "DISTINCTION", class: "bg-emerald-100 text-emerald-800" },
+    { seat: "204322", name: "PRANAV PATIL", m1: "100/76", m2: "100/82", pct: "79.0%", res: "DISTINCTION", class: "bg-emerald-100 text-emerald-800" },
+    { seat: "204323", name: "ROHIT DESHMUKH", m1: "100/62", m2: "100/70", pct: "66.0%", res: "FIRST CLASS", class: "bg-blue-100 text-blue-800" },
+    { seat: "204324", name: "SNEHA KULKARNI", m1: "100/94", m2: "100/97", pct: "95.5%", res: "DISTINCTION", class: "bg-emerald-100 text-emerald-800" },
+    { seat: "204325", name: "VIKRAM JADHAV", m1: "100/35", m2: "100/42", pct: "38.5%", res: "PASS CLASS", class: "bg-amber-100 text-amber-800" },
+  ];
+
+  return (
+    <div className="w-full h-[340px] bg-white rounded-3xl border border-[#1F3C88]/8 shadow-[0_24px_48px_-12px_rgba(31,60,136,0.12)] p-5 flex flex-col justify-between overflow-hidden relative">
+      {/* Excel header bar */}
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-[#107C41] flex items-center justify-center shadow-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.5 1h-8A2.5 2.5 0 005 3.5v17A2.5 2.5 0 007.5 23h9a2.5 2.5 0 002.5-2.5v-14L15.5 1z" fill="#107C41" />
+              <path d="M15.5 1v6h6" fill="#185C37" />
+              <path d="M9 16l6-6M9 10l6 6" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
+          <span className="text-xs font-bold text-slate-700 font-mono">
+            MSBTE_Results_W26.xlsx
           </span>
-        ))}
+        </div>
+        <span className="text-[10px] text-slate-400 font-medium font-sans">
+          Auto-Formatted Sheets
+        </span>
+      </div>
+
+      {/* Spreadsheet Table */}
+      <div className="flex-1 mt-3 overflow-x-auto">
+        <table className="w-full text-left border-collapse text-[10px]">
+          <thead>
+            <tr className="bg-slate-100 text-slate-600 border-t border-b border-slate-200">
+              <th className="py-2 px-2.5 border-r border-slate-200 font-bold font-mono">Seat No</th>
+              <th className="py-2 px-2.5 border-r border-slate-200 font-bold">Name</th>
+              <th className="py-1 px-2 border-r border-slate-200 text-center font-bold" colSpan={2}>Subject Code Marks</th>
+              <th className="py-2 px-2.5 border-r border-slate-200 text-center font-bold">Percentage</th>
+              <th className="py-2 px-2.5 text-center font-bold">Result</th>
+            </tr>
+            <tr className="bg-slate-50 text-[9px] text-slate-400 border-b border-slate-200">
+              <th className="py-1 px-2 border-r border-slate-200"></th>
+              <th className="py-1 px-2 border-r border-slate-200"></th>
+              <th className="py-1 px-2 border-r border-slate-200 text-center font-semibold text-blue-600">22412 (OS)</th>
+              <th className="py-1 px-2 border-r border-slate-200 text-center font-semibold text-purple-600">22415 (DS)</th>
+              <th className="py-1 px-2 border-r border-slate-200"></th>
+              <th className="py-1 px-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr 
+                key={r.seat} 
+                className={`border-b border-slate-150 transition-colors ${
+                  i % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                }`}
+              >
+                <td className="py-2 px-2.5 border-r border-slate-150 font-medium text-slate-500 font-mono">{r.seat}</td>
+                <td className="py-2 px-2.5 border-r border-slate-150 font-bold text-slate-700 truncate max-w-[90px]">{r.name}</td>
+                <td className="py-2 px-2 border-r border-slate-150 text-center font-medium text-slate-600">{r.m1}</td>
+                <td className="py-2 px-2 border-r border-slate-150 text-center font-medium text-slate-600">{r.m2}</td>
+                <td className="py-2 px-2.5 border-r border-slate-150 text-center font-bold text-slate-700">{r.pct}</td>
+                <td className="py-1.5 px-2.5 text-center">
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wide ${r.class}`}>
+                    {r.res}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 text-[9px] text-slate-400 font-mono bg-slate-50 -mx-5 -mb-5 px-5 py-2">
+        <span className="bg-white border-x border-t border-slate-200 text-[#107C41] font-bold px-2.5 py-1 rounded-t -mb-2 z-10">
+          Result Sheet
+        </span>
+        <span className="px-2 py-1">Department Stats</span>
+        <span className="px-2 py-1">+ Add Sheet</span>
       </div>
     </div>
   );
@@ -491,10 +758,21 @@ function FeaturesSection() {
   return (
     <section
       id="features"
-      className="py-32 w-full bg-white border-t border-slate-100"
+      style={featuresBgStyle}
+      className="py-32 w-full border-t border-slate-100 relative overflow-hidden"
       aria-label="Features"
     >
-      <Container className="flex flex-col gap-32">
+      {/* Decorative blobs in brand navy */}
+      <div 
+        className="absolute -right-32 -top-16 w-[400px] h-[400px] rounded-full bg-[#1F3C88] opacity-[0.05] blur-[90px] pointer-events-none z-0" 
+        aria-hidden="true"
+      />
+      <div 
+        className="absolute -left-32 -bottom-16 w-[400px] h-[400px] rounded-full bg-[#1F3C88] opacity-[0.05] blur-[90px] pointer-events-none z-0" 
+        aria-hidden="true"
+      />
+
+      <Container className="flex flex-col gap-32 relative z-10">
 
         {/* Section label */}
         <motion.div
@@ -525,19 +803,29 @@ function FeaturesSection() {
               Smart Automation
             </span>
             <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-snug">
-              Bypasses network fatigue, resolves captchas instantly.
+              Watch every worker scrape in real time.
             </h3>
             <p className="text-slate-500 leading-relaxed">
-              Intelligent retry engine with exponential back-off, auto session refresh, and adaptive rate limiting. Set it once and walk away.
+              A live status grid shows exactly what each concurrent worker is doing right now - navigating, solving captcha, or submitting - so nothing feels like a black box.
             </p>
-            <ul className="flex flex-col gap-3">
-              {["Adaptive retry with exponential back-off", "Auto session management & refresh", "Zero manual captcha interaction"].map((b) => (
-                <li key={b} className="flex items-start gap-3">
+            <motion.ul
+              variants={listContainerV}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-40px" }}
+              className="flex flex-col gap-3"
+            >
+              {[
+                "Live per-worker status grid, not just a log",
+                "Local OCR captcha solving - zero manual typing",
+                "Up to 30 retry attempts per seat with fresh captcha each time",
+              ].map((b) => (
+                <motion.li key={b} variants={listItemV} className="flex items-start gap-3">
                   <CheckCircle2 size={17} className="text-[#34A853] shrink-0 mt-0.5" strokeWidth={2} />
                   <span className="text-sm font-medium text-slate-600">{b}</span>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </motion.div>
 
           <motion.div
@@ -548,7 +836,7 @@ function FeaturesSection() {
             transition={{ delay: 0.1 }}
             whileHover={{ y: -8, transition: { duration: 0.3 } }}
           >
-            <ChartPlaceholder id="auto" />
+            <WorkerGridMockup />
           </motion.div>
         </div>
 
@@ -563,7 +851,7 @@ function FeaturesSection() {
             whileHover={{ y: -8, transition: { duration: 0.3 } }}
             className="order-2 lg:order-1"
           >
-            <ChartPlaceholder id="excel" />
+            <ExcelGridMockup />
           </motion.div>
 
           <motion.div
@@ -577,19 +865,29 @@ function FeaturesSection() {
               Auto-Excel Formatting
             </span>
             <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-snug">
-              Generates a polished Excel with merged headers &amp; analytics.
+              Excel that adapts to any department.
             </h3>
             <p className="text-slate-500 leading-relaxed">
-              Beautifully formatted .xlsx — merged subject-group headers, colour-coded pass/fail rows, and a built-in pass-rate summary sheet.
+              Subjects, marks, and grading symbols are detected dynamically at runtime - no hardcoded subject lists. Works identically whether you're scraping Computer, Mechanical, or Electrical results.
             </p>
-            <ul className="flex flex-col gap-3">
-              {["Merged headers, colour-coded rows", "Built-in analytics & pass-rate summary", "One-click export — no macros needed"].map((b) => (
-                <li key={b} className="flex items-start gap-3">
+            <motion.ul
+              variants={listContainerV}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-40px" }}
+              className="flex flex-col gap-3"
+            >
+              {[
+                "Dynamic subject detection - any department, any semester",
+                "Handles grace marks, condoned marks, and absent/exempt codes",
+                "Built-in difficulty heatmap and pass-rate insights",
+              ].map((b) => (
+                <motion.li key={b} variants={listItemV} className="flex items-start gap-3">
                   <CheckCircle2 size={17} className="text-[#4285F4] shrink-0 mt-0.5" strokeWidth={2} />
                   <span className="text-sm font-medium text-slate-600">{b}</span>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </motion.div>
         </div>
       </Container>
@@ -607,9 +905,11 @@ const CARDS = [
     color: "#4285F4",
     bg: "bg-blue-50",
     border: "border-blue-100",
+    topBorderColor: "#4285F4",
     title: "Installation Guide",
-    desc: "Step-by-step from download to first run. Covers Defender bypass, .NET runtime, and folder setup.",
+    desc: "Step-by-step from download to first run. Covers PyInstaller setup, folder configurations, and initial launching.",
     cta: "Read guide",
+    href: "/guide",
   },
   {
     id: "trouble",
@@ -617,9 +917,11 @@ const CARDS = [
     color: "#FBBC05",
     bg: "bg-amber-50",
     border: "border-amber-100",
+    topBorderColor: "#FBBC05",
     title: "Troubleshooting",
-    desc: "Portal timeouts, absent students, partial re-runs — every edge case documented without duplication.",
+    desc: "Windows Defender may flag the .exe as unrecognized on first run - this is normal for unsigned PyInstaller apps. Click 'More info' then 'Run anyway' to proceed.",
     cta: "See solutions",
+    href: "/troubleshooting",
   },
   {
     id: "privacy",
@@ -627,9 +929,11 @@ const CARDS = [
     color: "#34A853",
     bg: "bg-emerald-50",
     border: "border-emerald-100",
+    topBorderColor: "#34A853",
     title: "Data Privacy",
     desc: "Everything runs on your machine. No uploads, no remote storage. Student data stays local, always.",
     cta: "Learn more",
+    href: "/privacy",
   },
 ] as const;
 
@@ -646,7 +950,8 @@ function ResourcesSection() {
   return (
     <section
       id="resources"
-      className="py-32 w-full bg-slate-50 border-t border-slate-100"
+      style={dotGridBgStyle}
+      className="py-32 w-full border-t border-slate-100"
       aria-label="Resources"
     >
       <Container>
@@ -673,12 +978,19 @@ function ResourcesSection() {
           className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           {CARDS.map((c) => (
-            <motion.a
+            <MotionLink
               key={c.id}
-              href="#"
+              href={c.href}
               id={`res-${c.id}`}
               variants={cardV}
-              className="group flex flex-col gap-5 bg-white border border-slate-200 rounded-[2rem] p-10 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 cursor-pointer no-underline"
+              whileHover={{
+                y: -6,
+                boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.12)",
+                borderColor: "#e2e8f0",
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              style={{ borderTop: `4px solid ${c.topBorderColor}` }}
+              className="group flex flex-col gap-5 bg-white border border-slate-200 rounded-[2rem] p-10 cursor-pointer no-underline"
               aria-label={c.title}
             >
               <div className={`w-12 h-12 ${c.bg} border ${c.border} rounded-2xl flex items-center justify-center`}>
@@ -693,7 +1005,7 @@ function ResourcesSection() {
                 {c.cta}
                 <ArrowRight size={14} />
               </span>
-            </motion.a>
+            </MotionLink>
           ))}
         </motion.div>
       </Container>
@@ -708,10 +1020,21 @@ function DownloadSection() {
   return (
     <section
       id="download"
-      className="py-32 w-full bg-white border-t border-slate-100"
+      style={featuresBgStyle}
+      className="py-32 w-full border-t border-slate-100 relative overflow-hidden"
       aria-label="Download"
     >
-      <Container className="flex flex-col items-center text-center">
+      {/* Decorative blobs in brand navy */}
+      <div 
+        className="absolute -right-32 -top-16 w-[350px] h-[350px] rounded-full bg-[#1F3C88] opacity-[0.05] blur-[80px] pointer-events-none z-0" 
+        aria-hidden="true"
+      />
+      <div 
+        className="absolute -left-32 -bottom-16 w-[350px] h-[350px] rounded-full bg-[#1F3C88] opacity-[0.05] blur-[80px] pointer-events-none z-0" 
+        aria-hidden="true"
+      />
+
+      <Container className="flex flex-col items-center text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -719,7 +1042,7 @@ function DownloadSection() {
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col items-center gap-6 max-w-xl"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4285F4] to-[#34A853] flex items-center justify-center shadow-xl shadow-blue-200/60">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4285F4] to-[#34A853] flex items-center justify-center shadow-xl shadow-blue-200/60 animate-pulse">
             <Download size={28} className="text-white" strokeWidth={2} />
           </div>
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
@@ -728,37 +1051,63 @@ function DownloadSection() {
           <p className="text-slate-500 leading-relaxed text-lg">
             Download the Windows installer and have your first result sheet ready in minutes.
           </p>
-          <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
-            <a
-              href="#"
+          <div className="flex flex-col sm:flex-row items-center gap-4 mt-2 z-10">
+            <motion.a
+              href="https://github.com/prajwal-2509/msbte-result-scraper-v3/releases/download/v.1.0.0/MSBTE_Scraper_v1.0.0.zip"
+              download
+              target="_blank"
+              rel="noopener noreferrer"
               id="dl-main"
-              className="whitespace-nowrap group flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-semibold text-sm px-8 py-4 rounded-full hover:scale-105 hover:shadow-xl hover:shadow-slate-900/25 transition-all cursor-pointer active:scale-95"
+              whileHover={{ scale: 1.03, boxShadow: "0 20px 30px -10px rgba(15, 23, 42, 0.3)" }}
+              whileTap={{ scale: 0.97 }}
+              className="whitespace-nowrap group flex items-center gap-2 bg-slate-900 text-white font-semibold text-sm px-8 py-4 rounded-full cursor-pointer transition-colors hover:bg-slate-800"
             >
               <Download size={16} strokeWidth={2.5} />
               Download for Windows (.exe)
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a 
-  href="https://github.com/prajwal-2509/MSBTE-exe-Download-Web"
-  target="_blank" 
-  rel="noopener noreferrer"
-  className="bg-white border-2 border-slate-200 text-slate-700 px-7 py-3.5 rounded-full font-semibold hover:border-slate-300 transition-all cursor-pointer hover:bg-slate-50 hover:-translate-y-1 hover:shadow-lg flex items-center gap-2"
->
-  {/* 👇 Inline Bulletproof GitHub SVG Icon */}
-  <svg 
-    className="w-5 h-5 fill-current" 
-    viewBox="0 0 24 24" 
-    aria-hidden="true"
-  >
-    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.06.069-.06 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-  </svg>
-  View on GitHub
-</a>
+            </motion.a>
+            <motion.a 
+              href="https://github.com/prajwal-2509/msbte-result-scraper-v3"
+              target="_blank" 
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.03, boxShadow: "0 20px 30px -10px rgba(226, 232, 240, 0.5)" }}
+              whileTap={{ scale: 0.97 }}
+              className="bg-white border-2 border-slate-200 text-slate-700 px-7 py-3.5 rounded-full font-semibold hover:border-slate-300 cursor-pointer flex items-center gap-2 transition-colors"
+            >
+              {/* 👇 Inline Bulletproof GitHub SVG Icon */}
+              <svg 
+                className="w-5 h-5 fill-current" 
+                viewBox="0 0 24 24" 
+                aria-hidden="true"
+              >
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.06.069-.06 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+              </svg>
+              View on GitHub
+            </motion.a>
           </div>
-          <p className="text-xs text-slate-400 font-medium flex items-center gap-2 mt-1">
-            <span className="w-2 h-2 rounded-full bg-[#34A853] shrink-0" />
-            Windows 10/11 · .NET 6.0 Runtime · No internet required at runtime
-          </p>
+
+          {/* System Requirements Meta Badges */}
+          <div className="flex flex-wrap justify-center gap-3 mt-8 relative z-10">
+            {/* Badge 1: Windows */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-[#1F3C88]/5 border border-[#1F3C88]/10 text-slate-700 shadow-sm backdrop-blur-sm">
+              <svg className="w-3.5 h-3.5 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M0 3.449L9.75 2.1v9.45H0V3.449zM0 12.45h9.75v9.45L0 20.551v-8.101zM11.25 1.9L24 0v11.55H11.25V1.9zM11.25 12.45H24v11.55l-12.75-1.9v-9.65z" />
+              </svg>
+              <span>Windows 10/11</span>
+            </div>
+
+            {/* Badge 2: Python / Package */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-[#1F3C88]/5 border border-[#1F3C88]/10 text-slate-700 shadow-sm backdrop-blur-sm">
+              <Box size={14} className="text-[#34A853]" strokeWidth={2.5} />
+              <span>Python 3.11+ bundled</span>
+            </div>
+
+            {/* Badge 3: Download / Disk */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-[#1F3C88]/5 border border-[#1F3C88]/10 text-slate-700 shadow-sm backdrop-blur-sm">
+              <HardDrive size={14} className="text-[#FBBC05]" strokeWidth={2.5} />
+              <span>~680MB, fully offline</span>
+            </div>
+          </div>
         </motion.div>
       </Container>
     </section>
@@ -768,7 +1117,7 @@ function DownloadSection() {
 /* ═══════════════════════════════════════════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════════════════════════════════════════ */
-function Footer() {
+export function Footer() {
   return (
     /* EXACT SPEC: w-full bg-white border-t border-slate-200 py-10 mt-auto */
     <footer className="w-full bg-white border-t border-slate-200 py-10 mt-auto" role="contentinfo">
@@ -796,9 +1145,9 @@ function Footer() {
           </nav>
 
           {/* Attribution */}
-          <div className="flex flex-col items-center sm:items-end gap-0.5 font-medium">
-            <p>© 2026 MSBTE Master Scraper.</p>
-            <p>Developed by Prajwal Hulle | Govt. Polytechnic, Solapur</p>
+          <div className="flex flex-col items-center sm:items-end text-center sm:text-right gap-0 font-medium">
+            <p className="text-sm font-semibold text-slate-700 leading-tight">© 2026 MSBTE Master Scraper.</p>
+            <p className="text-xs font-medium text-slate-400 leading-tight mt-0.5">Developed by Prajwal Hulle | Govt. Polytechnic, Solapur</p>
           </div>
         </div>
       </Container>
