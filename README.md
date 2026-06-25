@@ -10,7 +10,7 @@
 
 ## Preview
 
-![Screenshot coming soon](docs/preview.png)
+![MSBTE Master Scraper landing page hero section](docs/preview.png)
 
 ---
 
